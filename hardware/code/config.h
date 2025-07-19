@@ -44,28 +44,13 @@ public:
 
   bool begin() {
     if (load()) {
-      if (deviceConfig.id == "") reset();
+      if (deviceConfig.id == "") {
+        deviceConfig.id = IDGenerator::generate();
+        deviceConfig.name = "Tempora-" + deviceConfig.id;
+        save();
+      }
       return true;
     } else return false;
-  }
-
-  bool reset() {
-    if (!preferences.begin(CONFIG_NAMESPACE, false)) return false;
-
-    if (deviceConfig.id == "") deviceConfig.id = IDGenerator::generate();
-    deviceConfig.name = "Tempora-" + deviceConfig.id;
-    deviceConfig.baudrate = 115200;
-
-    deviceConfig.pins.led = -1;
-    deviceConfig.pins.button = -1;
-    deviceConfig.pins.scl = -1;
-    deviceConfig.pins.sda = -1;
-
-    deviceConfig.ssid = "";
-    deviceConfig.password = "";
-    deviceConfig.remote_server = "";
-
-    return save();
   }
 
   bool load() {
@@ -73,7 +58,7 @@ public:
 
     deviceConfig.id = preferences.getString("id", "");
     deviceConfig.name = preferences.getString("name", "");
-    deviceConfig.baudrate = preferences.getInt("baudrate", 0);
+    deviceConfig.baudrate = preferences.getInt("baudrate", 115200);
 
     deviceConfig.pins.led = preferences.getInt("pin_led", -1);
     deviceConfig.pins.button = preferences.getInt("pin_button", -1);

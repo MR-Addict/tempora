@@ -44,10 +44,7 @@ void APMode() {
   ledService.blink();
 }
 
-void app() {
-  // Initialize serial
-  Serial.begin(115200);
-
+void setup() {
   // Initialize config
   if (config.begin()) {
     Serial.begin(config.getBaudrate());
@@ -72,7 +69,7 @@ void app() {
     delay(1000);
     if (digitalRead(config.getButtonPin()) == LOW) {
       unsigned long startTime = millis();
-      while (digitalRead(config.getButtonPin()) == LOW && millis() - startTime <= 5000) {
+      while (digitalRead(config.getButtonPin()) == LOW && millis() - startTime <= 3000) {
         delay(100);
       }
       if (millis() - startTime > 5000) isAPMode = true;
@@ -87,10 +84,6 @@ void app() {
     Serial.println("Starting in STA mode...");
     STAMode();
   }
-}
-
-void setup() {
-  app();
 }
 
 void loop() {
