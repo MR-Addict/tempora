@@ -23,15 +23,12 @@ interface Device {
   pins: {
     /**
      * LED pin number
-     *
-     * @default 2
      */
     led: number;
     /**
-     * Reset pin number
-     * @default 0
+     * Button pin number
      */
-    reset: number;
+    button: number;
     /**
      * Sensor data SCL pin number
      */
@@ -100,7 +97,7 @@ interface Status {
 
 On power on:
 
-- Check if reset pin is pressed
+- Check if button pin is pressed
   - If yes, enter AP mode, blink LED
   - If no, check if config exists and valid
     - If no, enter AP mode, blink LED

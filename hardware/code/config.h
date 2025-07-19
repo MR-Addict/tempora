@@ -4,7 +4,7 @@ struct ConfigStruct {
   int baudrate;
   struct {
     int led;
-    int reset;
+    int button;
     int scl;
     int sda;
   } pins;
@@ -39,17 +39,23 @@ public:
 
   bool begin() {
     if (load()) {
-      if (device.id == "") reset();
+      // if (device.id == "") reset();
+      reset();
       return true;
     } else return false;
   }
 
   bool reset() {
+    if (!preferences.begin(CONFIG_NAMESPACE, false)) return false;
+
+    preferences.clear();
+    preferences.end();
+
     device.id = IDGenerator::generate();
     device.name = "Tempora-" + device.id;
     device.baudrate = 115200;
-    device.pins.led = 2;
-    device.pins.reset = 0;
+    device.pins.led = -1;
+    device.pins.button = -1;
     device.pins.scl = -1;
     device.pins.sda = -1;
     device.ssid = "";
@@ -59,6 +65,7 @@ public:
     return save();
   }
 
+
   bool load() {
     if (!preferences.begin(CONFIG_NAMESPACE, true)) return false;
 
@@ -66,7 +73,7 @@ public:
     device.name = preferences.getString("name", "");
     device.baudrate = preferences.getInt("baudrate", 0);
     device.pins.led = preferences.getInt("pin_led", -1);
-    device.pins.reset = preferences.getInt("pin_reset", -1);
+    device.pins.button = preferences.getInt("pin_button", -1);
     device.pins.scl = preferences.getInt("pin_scl", -1);
     device.pins.sda = preferences.getInt("pin_sda", -1);
     device.ssid = preferences.getString("ssid", "");
@@ -84,7 +91,7 @@ public:
     preferences.putString("name", device.name);
     preferences.putInt("baudrate", device.baudrate);
     preferences.putInt("pin_led", device.pins.led);
-    preferences.putInt("pin_reset", device.pins.reset);
+    preferences.putInt("pin_button", device.pins.button);
     preferences.putInt("pin_scl", device.pins.scl);
     preferences.putInt("pin_sda", device.pins.sda);
     preferences.putString("ssid", device.ssid);
@@ -105,7 +112,7 @@ public:
 
     JsonObject pins = doc.createNestedObject("pins");
     pins["led"] = device.pins.led;
-    pins["reset"] = device.pins.reset;
+    pins["button"] = device.pins.button;
     pins["scl"] = device.pins.scl;
     pins["sda"] = device.pins.sda;
 
@@ -139,7 +146,7 @@ public:
     if (doc.containsKey("pins")) {
       JsonObject pins = doc["pins"];
       if (pins.containsKey("led")) device.pins.led = pins["led"];
-      if (pins.containsKey("reset")) device.pins.reset = pins["reset"];
+      if (pins.containsKey("button")) device.pins.button = pins["button"];
       if (pins.containsKey("scl")) device.pins.scl = pins["scl"];
       if (pins.containsKey("sda")) device.pins.sda = pins["sda"];
     }
@@ -171,8 +178,8 @@ public:
   int getLedPin() {
     return device.pins.led;
   }
-  int getResetPin() {
-    return device.pins.reset;
+  int getButtonPin() {
+    return device.pins.button;
   }
   int getSCLPin() {
     return device.pins.scl;
