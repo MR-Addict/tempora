@@ -68,11 +68,12 @@ void setup() {
   if (!isAPMode && config.getButtonPin() != -1 && digitalRead(config.getButtonPin()) == LOW) {
     delay(1000);
     if (digitalRead(config.getButtonPin()) == LOW) {
+      unsigned long duration = 3000;
       unsigned long startTime = millis();
-      while (digitalRead(config.getButtonPin()) == LOW && millis() - startTime <= 3000) {
+      while (digitalRead(config.getButtonPin()) == LOW && millis() - startTime <= duration) {
         delay(100);
       }
-      if (millis() - startTime > 5000) isAPMode = true;
+      if (millis() - startTime > duration) isAPMode = true;
     }
   }
 
