@@ -47,8 +47,11 @@ void init() {
 
   // Initialize pins
   WiFi.hostname(config.getName());
-  pinMode(config.getLedPin(), OUTPUT);
-  pinMode(config.getButtonPin(), INPUT_PULLUP);
+  if (config.getLedPin() != -1) pinMode(config.getLedPin(), OUTPUT);
+  if (config.getButtonPin() != -1) pinMode(config.getButtonPin(), INPUT_PULLUP);
+  if (config.getSCLPin() != -1 && config.getSDAPin() != -1) {
+    Wire.begin(config.getSCLPin(), config.getSDAPin());
+  }
 
   // Initialize WiFi
   bool isAPMode = config.getSSID().isEmpty() || config.getPassword().isEmpty();

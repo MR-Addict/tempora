@@ -39,8 +39,7 @@ public:
 
   bool begin() {
     if (load()) {
-      // if (device.id == "") reset();
-      reset();
+      if (device.id == "") reset();
       return true;
     } else return false;
   }
@@ -64,7 +63,6 @@ public:
 
     return save();
   }
-
 
   bool load() {
     if (!preferences.begin(CONFIG_NAMESPACE, true)) return false;
