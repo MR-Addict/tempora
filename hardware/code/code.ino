@@ -1,8 +1,12 @@
 #include <WiFi.h>
 #include <Wire.h>
+
 #include <Ticker.h>
 #include <ArduinoJson.h>
 #include <Preferences.h>
+
+#include <SPIFFS.h>
+#include <ESPAsyncWebServer.h>
 
 #include "led.h"
 #include "config.h"
@@ -10,6 +14,36 @@
 DeviceConfig config;
 LedService ledService;
 
+static AsyncWebServer server(80);
+
+/**
+Web Server handlers
+*/
+void handleNotFound(AsyncWebServerRequest* request) {
+  String url = request->url();
+  if (request->method() == HTTP_OPTIONS) request->send(200);
+  else if (request->method() == HTTP_GET) {
+    url += "index.html";
+    if (SPIFFS.exists(url)) request->send(SPIFFS, url, "text/html");
+    else request->send(404);
+  } else request->send(404, "text/plain", "404 Not Found");
+}
+
+void configGETRequest(AsyncWebServerRequest* request) {
+  request->send(200, "application/json", config.toJson());
+}
+
+void configPUTRequest(AsyncWebServerRequest* request) {
+  if (request->hasParam("body", true)) {
+    String formData = request->getParam("body", true)->value();
+    if (config.fromJson(formData)) request->send(200, "application/json", config.toJson());
+    else request->send(500, "text/plain", "Failed to parse form data");
+  } else request->send(400, "text/plain", "Missing form data");
+}
+
+/**
+WiFi handlers
+*/
 void disconnectedCallback(WiFiEvent_t event, WiFiEventInfo_t info) {
   WiFi.begin(config.getSSID(), config.getPassword());
   Serial.println("WiFi connection lost. Try to reconnect...");
@@ -55,6 +89,12 @@ void setup() {
     return;
   }
 
+  // init SPIFFS
+  if (!SPIFFS.begin(true)) {
+    Serial.println("Failed to mount SPIFFS");
+    return;
+  }
+
   // Initialize pins
   WiFi.hostname(config.getName());
   ledService.begin(config.getLedPin());
@@ -85,7 +125,26 @@ void setup() {
     Serial.println("Starting in STA mode...");
     STAMode();
   }
+
+  // Initialize web server
+  Serial.println("Starting web server...");
+
+  // Set up default headers
+  DefaultHeaders::Instance().addHeader("Server", "ESP32");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
+
+  // Serve static files from SPIFFS
+  server.serveStatic("/", SPIFFS, "/");
+
+  // Set up API endpoints
+  server.on("/api/config", HTTP_GET, configGETRequest);
+  server.on("/api/config", HTTP_PUT, configPUTRequest);
+
+  // Handle root and not found requests
+  server.onNotFound(handleNotFound);
+  server.begin();
 }
 
-void loop() {
-}
+void loop() {}

@@ -138,6 +138,8 @@ public:
     if (doc.containsKey("password")) deviceConfig.password = doc["password"].as<String>();
     if (doc.containsKey("remote_server")) deviceConfig.remote_server = doc["remote_server"].as<String>();
 
+    save();
+
     return true;
   }
 
