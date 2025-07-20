@@ -9,8 +9,10 @@
 #include <ESPAsyncWebServer.h>
 
 #include "led.h"
+#include "sht30.h"
 #include "config.h"
 
+SHT30 sht30;
 DeviceConfig config;
 LedService ledService;
 
@@ -115,6 +117,7 @@ void setup() {
   if (config.getButtonPin() != -1) pinMode(config.getButtonPin(), INPUT_PULLUP);
   if (config.getSCLPin() != -1 && config.getSDAPin() != -1) {
     Wire.begin(config.getSCLPin(), config.getSDAPin());
+    sht30.begin();
   }
 
   // Initialize WiFi
