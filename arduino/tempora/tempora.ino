@@ -43,9 +43,10 @@ void configPUTRequest(AsyncWebServerRequest* request) {
 }
 
 void restartRequest(AsyncWebServerRequest* request) {
-  restartTicker.attach_ms(2000, [](){
+  restartTicker.attach_ms(2000, []() {
     ESP.restart();
   });
+  ledService.blink();
   request->send(200, "text/plain", "Server restarting...");
 }
 
