@@ -53,6 +53,14 @@ public:
     } else return false;
   }
 
+  bool clear() {
+    if (!preferences.begin(CONFIG_NAMESPACE, false)) return false;
+    preferences.clear();
+    preferences.end();
+    load();
+    return true;
+  }
+
   bool load() {
     if (!preferences.begin(CONFIG_NAMESPACE, true)) return false;
 

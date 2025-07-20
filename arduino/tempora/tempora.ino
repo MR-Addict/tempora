@@ -14,6 +14,7 @@
 DeviceConfig config;
 LedService ledService;
 
+Ticker restartTicker;
 static AsyncWebServer server(80);
 
 /**
@@ -25,7 +26,7 @@ void handleNotFound(AsyncWebServerRequest* request) {
   else if (request->method() == HTTP_GET) {
     url += "index.html";
     if (SPIFFS.exists(url)) request->send(SPIFFS, url, "text/html");
-    else request->send(404);
+    else request->send(404, "text/plain", "404 Not Found");
   } else request->send(404, "text/plain", "404 Not Found");
 }
 
@@ -39,6 +40,18 @@ void configPUTRequest(AsyncWebServerRequest* request) {
     if (config.fromJson(formData)) request->send(200, "application/json", config.toJson());
     else request->send(500, "text/plain", "Failed to parse form data");
   } else request->send(400, "text/plain", "Missing form data");
+}
+
+void restartRequest(AsyncWebServerRequest* request) {
+  restartTicker.attach_ms(2000, [](){
+    ESP.restart();
+  });
+  request->send(200, "text/plain", "Server restarting...");
+}
+
+void resetRequest(AsyncWebServerRequest* request) {
+  config.clear();
+  request->send(200, "application/json", config.toJson());
 }
 
 /**
@@ -141,6 +154,8 @@ void setup() {
   // Set up API endpoints
   server.on("/api/config", HTTP_GET, configGETRequest);
   server.on("/api/config", HTTP_PUT, configPUTRequest);
+  server.on("/api/restart", HTTP_POST, restartRequest);
+  server.on("/api/reset", HTTP_POST, resetRequest);
 
   // Handle root and not found requests
   server.onNotFound(handleNotFound);
