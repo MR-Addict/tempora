@@ -125,5 +125,4 @@ Pages:
 
 LED behavior:
 
-- Always on: Device is operational
-- Blinking: Device is trying to connect to WiFi or in AP mode
+- Blinking: Device is in AP mode
