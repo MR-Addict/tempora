@@ -22,6 +22,26 @@ static AsyncWebServer server(80);
 /**
 Web Server handlers
 */
+void statusGETRequest(AsyncWebServerRequest* request) {
+  StaticJsonDocument<512> doc;
+
+  doc["led_connected"] = config.getLedPin() != -1;
+  doc["button_connected"] = config.getButtonPin() != -1;
+  doc["wifi_connected"] = WiFi.status() == WL_CONNECTED;
+  doc["sensor_connected"] = sht30.available();
+
+  doc["sta"] = WiFi.getMode() == WIFI_STA;
+  doc["rssi"] = WiFi.RSSI();
+  doc["ssid"] = WiFi.SSID();
+  doc["ip"] = WiFi.localIP().toString();
+  doc["mac"] = WiFi.macAddress();
+  doc["hostname"] = WiFi.getHostname();
+
+  String response;
+  serializeJson(doc, response);
+  request->send(200, "application/json", response);
+}
+
 void handleNotFound(AsyncWebServerRequest* request) {
   String url = request->url();
   if (request->method() == HTTP_OPTIONS) request->send(200);
@@ -44,6 +64,11 @@ void configPUTRequest(AsyncWebServerRequest* request) {
   } else request->send(400, "text/plain", "Missing form data");
 }
 
+void sensorGETRequest(AsyncWebServerRequest* request) {
+  SHT30Data data = sht30.readData();
+  request->send(200, "application/json", data.toJson());
+}
+
 void restartRequest(AsyncWebServerRequest* request) {
   restartTicker.attach_ms(2000, []() {
     ESP.restart();
@@ -55,11 +80,6 @@ void restartRequest(AsyncWebServerRequest* request) {
 void resetRequest(AsyncWebServerRequest* request) {
   config.reset();
   request->send(200, "application/json", config.toJson());
-}
-
-void sensorGETRequest(AsyncWebServerRequest* request) {
-  SHT30Data data = sht30.readData();
-  request->send(200, "application/json", data.toJson());
 }
 
 /**
@@ -158,11 +178,13 @@ void setup() {
   server.serveStatic("/", SPIFFS, "/");
 
   // Set up API endpoints
+  server.on("/api", HTTP_GET, statusGETRequest);
+  server.on("/api/status", HTTP_GET, statusGETRequest);
   server.on("/api/config", HTTP_GET, configGETRequest);
   server.on("/api/config", HTTP_PUT, configPUTRequest);
+  server.on("/api/sensor", HTTP_GET, sensorGETRequest);
   server.on("/api/restart", HTTP_POST, restartRequest);
   server.on("/api/reset", HTTP_POST, resetRequest);
-  server.on("/api/sensor", HTTP_GET, sensorGETRequest);
 
   // Handle root and not found requests
   server.onNotFound(handleNotFound);

@@ -77,10 +77,14 @@ public:
     return true;
   }
 
+  bool available() {
+    return ready;
+  }
+
   SHT30Data readData() {
     SHT30Data result = { 0.0, 0.0, false };
 
-    if (!ready) {
+    if (!available()) {
       return result;
     }
 
