@@ -5,13 +5,32 @@
 #define SHT30_CMD_MEAS_HIGHREP 0x2400
 
 struct SHT30Data {
+  // Temperature in degrees Celsius
   float temperature;
+
+  // Humidity in percentage
   float humidity;
+
+  // Indicates if the data is valid
   bool valid;
+
+  // Serialize data to JSON string
+  String toJson() {
+    DynamicJsonDocument doc(256);
+
+    doc["temperature"] = temperature;
+    doc["humidity"] = humidity;
+    doc["valid"] = valid;
+
+    String jsonString;
+    serializeJson(doc, jsonString);
+    return jsonString;
+  }
 };
 
 class SHT30 {
 private:
+  bool ready;
   uint8_t _address;
 
   bool writeCommand(uint16_t command) {
@@ -37,16 +56,33 @@ private:
   }
 
 public:
-  SHT30(uint8_t address = SHT30_DEFAULT_ADDR)
-    : _address(address) {}
+  SHT30() {}
 
-  bool begin() {
+  // Initialize the sensor
+  bool begin(uint8_t sda = -1, uint8_t scl = -1, uint8_t address = SHT30_DEFAULT_ADDR) {
+    _address = address;
+    if (sda == -1 || scl == -1) {
+      ready = false;
+      return false;
+    }
+
+    Wire.begin(sda, scl);
     Wire.beginTransmission(_address);
-    return (Wire.endTransmission() == 0);
+    if (Wire.endTransmission() != 0) {
+      ready = false;
+      return false;
+    }
+
+    ready = true;
+    return true;
   }
 
   SHT30Data readData() {
     SHT30Data result = { 0.0, 0.0, false };
+
+    if (!ready) {
+      return result;
+    }
 
     // Send measurement command
     if (!writeCommand(SHT30_CMD_MEAS_HIGHREP)) {

@@ -53,8 +53,13 @@ void restartRequest(AsyncWebServerRequest* request) {
 }
 
 void resetRequest(AsyncWebServerRequest* request) {
-  config.clear();
+  config.reset();
   request->send(200, "application/json", config.toJson());
+}
+
+void sensorGETRequest(AsyncWebServerRequest* request) {
+  SHT30Data data = sht30.readData();
+  request->send(200, "application/json", data.toJson());
 }
 
 /**
@@ -114,11 +119,8 @@ void setup() {
   // Initialize pins
   WiFi.hostname(config.getName());
   ledService.begin(config.getLedPin());
+  sht30.begin(config.getSDAPin(), config.getSCLPin());
   if (config.getButtonPin() != -1) pinMode(config.getButtonPin(), INPUT_PULLUP);
-  if (config.getSCLPin() != -1 && config.getSDAPin() != -1) {
-    Wire.begin(config.getSCLPin(), config.getSDAPin());
-    sht30.begin();
-  }
 
   // Initialize WiFi
   bool isAPMode = config.getSSID().isEmpty() || config.getPassword().isEmpty();
@@ -160,6 +162,7 @@ void setup() {
   server.on("/api/config", HTTP_PUT, configPUTRequest);
   server.on("/api/restart", HTTP_POST, restartRequest);
   server.on("/api/reset", HTTP_POST, resetRequest);
+  server.on("/api/sensor", HTTP_GET, sensorGETRequest);
 
   // Handle root and not found requests
   server.onNotFound(handleNotFound);

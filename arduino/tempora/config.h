@@ -9,8 +9,8 @@ struct ConfigStruct {
   struct {
     int led;
     int button;
-    int scl;
     int sda;
+    int scl;
   } pins;
 
   String ssid;
@@ -44,20 +44,27 @@ public:
 
   bool begin() {
     if (load()) {
-      if (deviceConfig.id == "") {
-        deviceConfig.id = IDGenerator::generate();
-        deviceConfig.name = "Tempora-" + deviceConfig.id;
-        save();
-      }
+      if (deviceConfig.id == "") reset();
       return true;
     } else return false;
   }
 
-  bool clear() {
-    if (!preferences.begin(CONFIG_NAMESPACE, false)) return false;
-    preferences.clear();
-    preferences.end();
-    load();
+  bool reset() {
+    if (deviceConfig.id == "") deviceConfig.id = IDGenerator::generate();
+    deviceConfig.name = "Tempora-" + deviceConfig.id;
+    deviceConfig.baudrate = 115200;
+
+    deviceConfig.pins.led = -1;
+    deviceConfig.pins.button = -1;
+    deviceConfig.pins.sda = -1;
+    deviceConfig.pins.scl = -1;
+
+    deviceConfig.ssid = "";
+    deviceConfig.password = "";
+    deviceConfig.remote_server = "";
+
+    save();
+
     return true;
   }
 
@@ -70,8 +77,8 @@ public:
 
     deviceConfig.pins.led = preferences.getInt("pin_led", -1);
     deviceConfig.pins.button = preferences.getInt("pin_button", -1);
-    deviceConfig.pins.scl = preferences.getInt("pin_scl", -1);
     deviceConfig.pins.sda = preferences.getInt("pin_sda", -1);
+    deviceConfig.pins.scl = preferences.getInt("pin_scl", -1);
 
     deviceConfig.ssid = preferences.getString("ssid", "");
     deviceConfig.password = preferences.getString("password", "");
@@ -90,8 +97,8 @@ public:
 
     preferences.putInt("pin_led", deviceConfig.pins.led);
     preferences.putInt("pin_button", deviceConfig.pins.button);
-    preferences.putInt("pin_scl", deviceConfig.pins.scl);
     preferences.putInt("pin_sda", deviceConfig.pins.sda);
+    preferences.putInt("pin_scl", deviceConfig.pins.scl);
 
     preferences.putString("ssid", deviceConfig.ssid);
     preferences.putString("password", deviceConfig.password);
@@ -112,8 +119,8 @@ public:
     JsonObject pins = doc.createNestedObject("pins");
     pins["led"] = deviceConfig.pins.led;
     pins["button"] = deviceConfig.pins.button;
-    pins["scl"] = deviceConfig.pins.scl;
     pins["sda"] = deviceConfig.pins.sda;
+    pins["scl"] = deviceConfig.pins.scl;
 
     doc["ssid"] = deviceConfig.ssid;
     doc["password"] = deviceConfig.password;
@@ -138,8 +145,8 @@ public:
       JsonObject pins = doc["pins"];
       if (pins.containsKey("led")) deviceConfig.pins.led = pins["led"];
       if (pins.containsKey("button")) deviceConfig.pins.button = pins["button"];
-      if (pins.containsKey("scl")) deviceConfig.pins.scl = pins["scl"];
       if (pins.containsKey("sda")) deviceConfig.pins.sda = pins["sda"];
+      if (pins.containsKey("scl")) deviceConfig.pins.scl = pins["scl"];
     }
 
     if (doc.containsKey("ssid")) deviceConfig.ssid = doc["ssid"].as<String>();
@@ -173,11 +180,11 @@ public:
   int getButtonPin() {
     return deviceConfig.pins.button;
   }
-  int getSCLPin() {
-    return deviceConfig.pins.scl;
-  }
   int getSDAPin() {
     return deviceConfig.pins.sda;
+  }
+  int getSCLPin() {
+    return deviceConfig.pins.scl;
   }
   int getBaudrate() {
     return deviceConfig.baudrate;
