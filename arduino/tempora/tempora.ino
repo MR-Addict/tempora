@@ -178,7 +178,6 @@ void setup() {
   server.serveStatic("/", SPIFFS, "/");
 
   // Set up API endpoints
-  server.on("/api", HTTP_GET, statusGETRequest);
   server.on("/api/status", HTTP_GET, statusGETRequest);
   server.on("/api/config", HTTP_GET, configGETRequest);
   server.on("/api/config", HTTP_PUT, configPUTRequest);
