@@ -20,8 +20,21 @@ Ticker restartTicker;
 static AsyncWebServer server(80);
 
 /**
-Web Server handlers
+  Web Server handlers
 */
+void handleNotFound(AsyncWebServerRequest* request) {
+  String url = request->url();
+  if (request->method() == HTTP_OPTIONS) request->send(200);
+  else if (request->method() == HTTP_GET) {
+    if (SPIFFS.exists(url)) request->send(SPIFFS, url, "text/html");
+    else {
+      url += "index.html";
+      if (SPIFFS.exists(url)) request->send(SPIFFS, url, "text/html");
+      else request->send(404, "text/plain", "404 Not Found");
+    }
+  } else request->send(404, "text/plain", "404 Not Found");
+}
+
 void statusGETRequest(AsyncWebServerRequest* request) {
   StaticJsonDocument<512> doc;
 
@@ -40,16 +53,6 @@ void statusGETRequest(AsyncWebServerRequest* request) {
   String response;
   serializeJson(doc, response);
   request->send(200, "application/json", response);
-}
-
-void handleNotFound(AsyncWebServerRequest* request) {
-  String url = request->url();
-  if (request->method() == HTTP_OPTIONS) request->send(200);
-  else if (request->method() == HTTP_GET) {
-    url += "index.html";
-    if (SPIFFS.exists(url)) request->send(SPIFFS, url, "text/html");
-    else request->send(404, "text/plain", "404 Not Found");
-  } else request->send(404, "text/plain", "404 Not Found");
 }
 
 void configGETRequest(AsyncWebServerRequest* request) {
@@ -83,7 +86,7 @@ void resetRequest(AsyncWebServerRequest* request) {
 }
 
 /**
-WiFi handlers
+  WiFi handlers
 */
 void disconnectedCallback(WiFiEvent_t event, WiFiEventInfo_t info) {
   WiFi.begin(config.getSSID(), config.getPassword());
@@ -114,7 +117,7 @@ void APMode() {
   }
 
   WiFi.mode(WIFI_AP);
-  WiFi.softAP(config.getName());
+  WiFi.softAP("Tempora-" + config.getId());
   Serial.printf("AP IP: %s\n", WiFi.softAPIP().toString().c_str());
   ledService.blink();
 }
@@ -137,7 +140,7 @@ void setup() {
   }
 
   // Initialize pins
-  WiFi.hostname(config.getName());
+  WiFi.hostname("Tempora-" + config.getId());
   ledService.begin(config.getLedPin());
   sht30.begin(config.getSDAPin(), config.getSCLPin());
   if (config.getButtonPin() != -1) pinMode(config.getButtonPin(), INPUT_PULLUP);
@@ -173,9 +176,6 @@ void setup() {
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
   DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
-
-  // Serve static files from SPIFFS
-  server.serveStatic("/", SPIFFS, "/");
 
   // Set up API endpoints
   server.on("/api/status", HTTP_GET, statusGETRequest);
