@@ -1,3 +1,7 @@
+data
+dist
 .DS_Store
 node_modules
-data
+pnpm-lock.yaml
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
