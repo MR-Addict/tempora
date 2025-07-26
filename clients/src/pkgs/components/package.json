@@ -1,0 +1,32 @@
+{
+  "name": "@pkgs/components",
+  "devDependencies": {
+    "@pkgs/config": "workspace:*",
+    "@pkgs/hooks": "workspace:*",
+    "@pkgs/utils": "workspace:*",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@vitejs/plugin-react": "^4.7.0",
+    "clsx": "^2.1.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-icons": "^5.5.0",
+    "tailwindcss": "^4.1.11",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.6",
+    "vite-plugin-dts": "^4.5.4",
+    "zod": "3.25.67"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/components.mjs"
+    },
+    "./style.css": "./dist/components.css"
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite dev"
+  },
+  "types": "./dist/index.d.ts"
+}

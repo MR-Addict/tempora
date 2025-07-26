@@ -1,0 +1,16 @@
+{
+  "extends": "@pkgs/config/tsconfig/vite.json",
+
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "./dist",
+
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", ".turbo"]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "tempora",
+  "version": "1.0.0",
+  "devDependencies": {
+    "prettier": "^3.6.2",
+    "syncpack": "^14.0.0-alpha.18",
+    "turbo": "^2.5.5"
+  },
+  "packageManager": "pnpm@10.12.4",
+  "prettier": {
+    "useTabs": false,
+    "singleQuote": false,
+    "trailingComma": "none",
+    "printWidth": 120
+  },
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "format": "prettier -c --write .",
+    "preview": "turbo preview",
+    "sync:fix": "syncpack fix --specifier-types range",
+    "sync:format": "syncpack format",
+    "sync:update": "syncpack update --specifier-types range"
+  }
+}

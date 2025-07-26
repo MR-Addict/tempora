@@ -1,0 +1,8 @@
+{
+  "name": "@pkgs/config",
+  "exports": {
+    "./tsconfig/pkg.json": "./src/tsconfig/pkg.json",
+    "./tsconfig/vite.json": "./src/tsconfig/vite.json",
+    "./styles/tailwind.css": "./src/styles/tailwind.css"
+  }
+}

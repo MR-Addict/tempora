@@ -1,0 +1,9 @@
+{
+  "extends": "@pkgs/config/tsconfig/pkg.json",
+  "compilerOptions": {
+    "outDir": "./dist"
+  },
+
+  "include": ["index.ts"],
+  "exclude": ["node_modules", "dist", ".turbo"]
+}

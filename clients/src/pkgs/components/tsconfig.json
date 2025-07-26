@@ -1,0 +1,11 @@
+{
+  "extends": "@pkgs/config/tsconfig/pkg.json",
+
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "./dist"
+  },
+
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", ".turbo"]
+}

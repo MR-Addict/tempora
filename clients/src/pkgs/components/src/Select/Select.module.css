@@ -1,0 +1,40 @@
+@import "tailwindcss";
+@import "@pkgs/config/styles/tailwind.css";
+
+.select {
+  @apply relative whitespace-nowrap;
+
+  & .label-btn {
+    @apply flex flex-row items-center gap-1;
+
+    & .arrowIcon {
+      @apply duration-300;
+    }
+
+    &.expanded .arrowIcon {
+      @apply transform rotate-180;
+    }
+  }
+
+  & .select-menu {
+    @apply border border-gray-200 bg-white;
+    @apply absolute z-10 top-full translate-y-2 right-0 rounded-md;
+    @apply flex flex-col gap-0.5 origin-top invisible opacity-0 scale-y-90 duration-100 py-1.5;
+
+    &.expanded {
+      @apply visible scale-y-100 opacity-100;
+    }
+
+    & .option-btn {
+      @apply px-7 py-1.5 w-full duration-300;
+
+      &.active {
+        @apply bg-gray-300;
+      }
+
+      &:disabled {
+        @apply cursor-not-allowed text-gray-400;
+      }
+    }
+  }
+}

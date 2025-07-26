@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@import "@pkgs/config/styles/tailwind.css";
+
+#root {
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  @apply flex flex-col;
+}
+
+button {
+  cursor: pointer;
+}
