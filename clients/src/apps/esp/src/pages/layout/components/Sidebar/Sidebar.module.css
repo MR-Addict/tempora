@@ -27,7 +27,7 @@
   }
 
   &.active {
-    @apply w-64 border-r;
+    @apply w-72 border-r;
   }
 }
 

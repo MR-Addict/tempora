@@ -1,16 +1,31 @@
 import clsx from "clsx";
+import { useRef } from "react";
 import { Link } from "react-router";
 import { LuPanelLeftClose } from "react-icons/lu";
 
 import style from "./Sidebar.module.css";
-import { links } from "@/data/links";
+import { links, NavLink } from "@/data/links";
 import { useAppContext } from "@/contexts/App";
+import { useClickOutside, useMediaQuery } from "@pkgs/hooks";
 
 export default function Sidebar() {
   const { pathname, openSidebar, setOpenSidebar } = useAppContext();
 
+  const sidebarRef = useRef<HTMLHeadElement>(null);
+  const isSmallScreen = useMediaQuery("(max-width: 768px)");
+
+  function handleClickLink(link: NavLink) {
+    if (pathname !== link.href && isSmallScreen) setOpenSidebar(false);
+  }
+
+  function handleClickOutside() {
+    if (isSmallScreen && openSidebar) setOpenSidebar(false);
+  }
+
+  useClickOutside(handleClickOutside, sidebarRef, [isSmallScreen, openSidebar]);
+
   return (
-    <header className={clsx(style.wrapper, { [style.active]: openSidebar })}>
+    <header ref={sidebarRef} className={clsx(style.wrapper, { [style.active]: openSidebar })}>
       <header>
         <h1>Tempora</h1>
         {openSidebar && (
@@ -22,13 +37,17 @@ export default function Sidebar() {
 
       <nav className={style.nav}>
         <ul>
-          {links.map((tab) => (
-            <li key={tab.href}>
-              <Link to={tab.href} className={clsx(style.link, { [style.active]: pathname === tab.href })}>
+          {links.map((link) => (
+            <li key={link.href}>
+              <Link
+                to={link.href}
+                className={clsx(style.link, { [style.active]: pathname === link.href })}
+                onClick={() => handleClickLink(link)}
+              >
                 <div>
-                  <tab.Icon size={24} />
+                  <link.Icon size={24} />
                 </div>
-                <span>{tab.name}</span>
+                <span>{link.name}</span>
               </Link>
             </li>
           ))}
