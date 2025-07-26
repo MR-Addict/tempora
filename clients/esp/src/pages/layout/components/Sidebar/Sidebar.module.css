@@ -1,0 +1,52 @@
+@reference "tailwindcss";
+
+.wrapper {
+  height: 100vh;
+  height: 100dvh;
+
+  transition: width 300ms;
+
+  @apply border-r-0 border-gray-200 bg-white;
+  @apply overflow-hidden whitespace-nowrap;
+  @apply z-10 w-0 flex flex-col fixed md:sticky gap-4 top-0;
+
+  & > header {
+    @apply px-4 py-1 relative;
+
+    & h1 {
+      @apply text-xl font-semibold font-serif border-b border-gray-300 py-2;
+    }
+
+    & button {
+      @apply p-1.5 rounded-full md:hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-700;
+
+      &:hover {
+        @apply bg-gray-200;
+      }
+    }
+  }
+
+  &.active {
+    @apply w-64 border-r;
+  }
+}
+
+.nav {
+  @apply flex flex-col overflow-auto;
+
+  & > ul {
+    @apply flex flex-col gap-2 px-4;
+  }
+}
+
+.link {
+  @apply py-3 px-3 rounded-md flex flex-row items-center gap-1 duration-300;
+
+  &:hover {
+    @apply bg-gray-100;
+  }
+
+  &.active {
+    @apply bg-gray-300;
+  }
+}

@@ -1,20 +1,20 @@
-import path from 'path';
-import tailwindcss from '@tailwindcss/vite';
+import path from "path";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
-import { defineConfig } from 'vite';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { defineConfig } from "vite";
 
 export default defineConfig({
-	base: './',
-	plugins: [svelte(), tailwindcss()],
-	resolve: { alias: [{ find: '@', replacement: path.resolve(__dirname, 'src') }] },
-	build: {
-		rollupOptions: {
-			output: {
-				entryFileNames: '[name].js',
-				chunkFileNames: '[hash].js',
-				assetFileNames: '[hash][extname]'
-			}
-		}
-	}
+  base: "./",
+  plugins: [react(), tailwindcss()],
+  resolve: { alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }] },
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: "[name].js",
+        chunkFileNames: "[hash].js",
+        assetFileNames: "[hash][extname]"
+      }
+    }
+  }
 });

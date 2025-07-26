@@ -1,5 +1,6 @@
-data
 dist
+/arduino/tempora/data
+
 .DS_Store
 node_modules
 pnpm-lock.yaml

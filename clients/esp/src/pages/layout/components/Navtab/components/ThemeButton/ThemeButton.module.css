@@ -1,0 +1,13 @@
+@reference "tailwindcss";
+
+.label {
+  @apply p-1.5 rounded-full text-gray-800;
+
+  &:hover {
+    @apply bg-gray-200;
+  }
+}
+
+.value {
+  @apply flex flex-row items-center gap-1 py-1 text-sm;
+}
