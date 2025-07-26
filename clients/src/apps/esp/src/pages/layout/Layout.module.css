@@ -1,7 +1,16 @@
+@reference "tailwindcss";
+
 .wrapper {
   @apply flex flex-row;
 }
 
 .content {
-  @apply flex-1 flex flex-col;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  @apply max-w-full flex-1 flex flex-col;
+}
+
+.main {
+  @apply w-full flex-1 px-6 flex flex-col;
 }

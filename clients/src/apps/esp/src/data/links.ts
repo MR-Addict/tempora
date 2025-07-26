@@ -16,7 +16,7 @@ export const links: NavLink[] = [
   },
   {
     href: "/setup",
-    name: "传感器设置",
+    name: "配置信息",
     Icon: HiOutlineCpuChip
   }
 ];
