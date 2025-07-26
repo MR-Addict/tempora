@@ -26,10 +26,17 @@ void handleNotFound(AsyncWebServerRequest* request) {
   String url = request->url();
   if (request->method() == HTTP_OPTIONS) request->send(200);
   else if (request->method() == HTTP_GET) {
-    if (SPIFFS.exists(url)) request->send(SPIFFS, url, "text/html");
-    else {
+    if (SPIFFS.exists(url)) {
+      if (url.endsWith(".js") || url.endsWith(".css")) {
+        String contentType = url.endsWith(".js") ? "application/javascript" : "text/css";
+        AsyncWebServerResponse* response = request->beginResponse(SPIFFS, url, contentType);
+        response->addHeader(AsyncWebHeader("Cache-Control", "max-age=259200, public"));
+        request->send(response);
+      } else request->send(SPIFFS, url);
+    } else {
       url += "index.html";
       if (SPIFFS.exists(url)) request->send(SPIFFS, url, "text/html");
+
       else request->send(404, "text/plain", "404 Not Found");
     }
   } else request->send(404, "text/plain", "404 Not Found");
