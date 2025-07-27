@@ -8,7 +8,8 @@ private:
   Ticker ledTicker;
 
   void blinkCallback() {
-    if (ready) digitalWrite(ledPin, !digitalRead(ledPin));
+    if (!ready) return;
+    digitalWrite(ledPin, !digitalRead(ledPin));
   }
 
 public:
@@ -31,17 +32,22 @@ public:
 
   // Set LED to always on
   void on() {
-    if (ready) digitalWrite(ledPin, HIGH);
+    if (!ready) return;
+    digitalWrite(ledPin, HIGH);
+    ledTicker.detach();
   }
 
   // Set LED to always off
   void off() {
-    if (ready) digitalWrite(ledPin, LOW);
+    if (!ready) return;
+    digitalWrite(ledPin, LOW);
+    ledTicker.detach();
   }
 
   // Set LED to blink mode with specified interval (in milliseconds)
   void blink(uint64_t interval = 300) {
-    if (ready) ledTicker.attach_ms(interval, std::bind(&LedService::blinkCallback, this));
+    if (!ready) return;
+    ledTicker.attach_ms(interval, std::bind(&LedService::blinkCallback, this));
   }
 };
 

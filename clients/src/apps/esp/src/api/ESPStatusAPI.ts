@@ -11,7 +11,7 @@ async function getESPStatus(): Promise<ApiResultType<ESPStatus>> {
   const apiUrl = "/api/status";
 
   try {
-    const res = await fetch(apiUrl).then((res) => res.json());
+    const res = await fetch(apiUrl, { credentials: "include" }).then((res) => res.json());
     const parsed = ESPStatusSchema.safeParse(res);
     if (parsed.success) return { success: true, message: successMessage, data: parsed.data };
     else return { success: false, message: failureMessage, detail: parsed.error.message };

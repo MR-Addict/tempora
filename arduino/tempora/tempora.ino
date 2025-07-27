@@ -9,6 +9,7 @@
 #include <ESPAsyncWebServer.h>
 
 #include "led.h"
+#include "utils.h"
 #include "sht30.h"
 #include "config.h"
 
@@ -22,6 +23,43 @@ static AsyncWebServer server(80);
 /**
   Web Server handlers
 */
+static AsyncMiddlewareFunction authMiddleware([](AsyncWebServerRequest* request, ArMiddlewareNext next) {
+  // Skip authentication if no token is set
+  if (config.getToken().isEmpty()) next();
+  else {
+    bool isAuthenticated = false;
+
+    if (!request->getHeader("Cookie")) isAuthenticated = false;
+    else {
+      String cookies = request->getHeader("Cookie")->value();
+      String cookieValue = Utils::getCookieValue(cookies, "token");
+      isAuthenticated = (cookieValue == config.getToken());
+    }
+
+    if (isAuthenticated) next();
+    else request->send(401, "text/plain", "未授权访问，请先登录");
+  }
+});
+
+void loginRequest(AsyncWebServerRequest* request) {
+  if (config.getToken().isEmpty()) request->send(500, "text/plain", "ESP32还没有配置token信息");
+  else if (request->hasParam("password", true)) {
+    String password = request->getParam("password", true)->value();
+    String token = Utils::hash(password);
+    if (token == config.getToken()) {
+      AsyncWebServerResponse* response = request->beginResponse(200, "text/plain", "登录成功");
+      response->addHeader("Set-Cookie", "token=" + token + "; Path=/; HttpOnly; Max-Age=2592000");
+      request->send(response);
+    } else request->send(401, "text/plain", "密码错误");
+  } else request->send(400, "text/plain", "缺少密码参数");
+}
+
+void logoutRequest(AsyncWebServerRequest* request) {
+  AsyncWebServerResponse* response = request->beginResponse(200, "text/plain", "登出成功");
+  response->addHeader("Set-Cookie", "token=; Path=/; HttpOnly; Max-Age=0");
+  request->send(response);
+}
+
 void handleNotFound(AsyncWebServerRequest* request) {
   String url = request->url();
   if (request->method() == HTTP_OPTIONS) request->send(200);
@@ -42,11 +80,15 @@ void handleNotFound(AsyncWebServerRequest* request) {
   } else request->send(404, "text/plain", "404 Not Found");
 }
 
+void healthCheckRequest(AsyncWebServerRequest* request) {
+  request->send(200, "text/plain", "OK");
+}
+
 void statusGETRequest(AsyncWebServerRequest* request) {
   StaticJsonDocument<512> doc;
 
-  doc["led_connected"] = config.getLedPin() != -1;
-  doc["button_connected"] = config.getButtonPin() != -1;
+  doc["led_connected"] = config.getPinsLed() != -1;
+  doc["button_connected"] = config.getPinsButton() != -1;
   doc["wifi_connected"] = WiFi.status() == WL_CONNECTED;
   doc["sensor_connected"] = sht30.available();
 
@@ -70,8 +112,8 @@ void configPUTRequest(AsyncWebServerRequest* request) {
   if (request->hasParam("body", true)) {
     String formData = request->getParam("body", true)->value();
     if (config.fromJson(formData)) request->send(200, "application/json", config.toJson());
-    else request->send(500, "text/plain", "Failed to parse form data");
-  } else request->send(400, "text/plain", "Missing form data");
+    else request->send(500, "text/plain", "配置信息格式错误");
+  } else request->send(400, "text/plain", "请求体缺少body参数");
 }
 
 void sensorGETRequest(AsyncWebServerRequest* request) {
@@ -84,7 +126,7 @@ void restartRequest(AsyncWebServerRequest* request) {
     ESP.restart();
   });
   ledService.blink();
-  request->send(200, "text/plain", "Server restarting...");
+  request->send(200, "text/plain", "重启请求已发送，ESP32将在2秒后重启");
 }
 
 void resetRequest(AsyncWebServerRequest* request) {
@@ -96,14 +138,16 @@ void resetRequest(AsyncWebServerRequest* request) {
   WiFi handlers
 */
 void disconnectedCallback(WiFiEvent_t event, WiFiEventInfo_t info) {
-  WiFi.begin(config.getSSID(), config.getPassword());
+  if (config.getWiFiPassword().isEmpty()) WiFi.begin(config.getWiFiSSID());
+  else WiFi.begin(config.getWiFiSSID(), config.getWiFiPassword());
   Serial.println("WiFi connection lost. Try to reconnect...");
 }
 
 void STAMode() {
   WiFi.mode(WIFI_STA);
-  WiFi.begin(config.getSSID(), config.getPassword());
-  Serial.printf("Connecting to %s", config.getSSID());
+  if (config.getWiFiPassword().isEmpty()) WiFi.begin(config.getWiFiSSID());
+  else WiFi.begin(config.getWiFiSSID(), config.getWiFiPassword());
+  Serial.printf("Connecting to %s", config.getWiFiSSID());
   WiFi.onEvent(disconnectedCallback, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -124,7 +168,7 @@ void APMode() {
   }
 
   WiFi.mode(WIFI_AP);
-  WiFi.softAP("Tempora-" + config.getId());
+  WiFi.softAP("tempora-" + config.getId());
   Serial.printf("AP IP: %s\n", WiFi.softAPIP().toString().c_str());
   ledService.blink();
 }
@@ -147,19 +191,19 @@ void setup() {
   }
 
   // Initialize pins
-  WiFi.hostname("Tempora-" + config.getId());
-  ledService.begin(config.getLedPin());
-  sht30.begin(config.getSDAPin(), config.getSCLPin());
-  if (config.getButtonPin() != -1) pinMode(config.getButtonPin(), INPUT_PULLUP);
+  WiFi.hostname("tempora-" + config.getId());
+  ledService.begin(config.getPinsLed());
+  sht30.begin(config.getPinsSDA(), config.getPinsSCL());
+  if (config.getPinsButton() != -1) pinMode(config.getPinsButton(), INPUT_PULLUP);
 
   // Initialize WiFi
-  bool isAPMode = config.getSSID().isEmpty() || config.getPassword().isEmpty();
-  if (!isAPMode && config.getButtonPin() != -1 && digitalRead(config.getButtonPin()) == LOW) {
+  bool isAPMode = config.getWiFiSSID().isEmpty();
+  if (!isAPMode && config.getPinsButton() != -1 && digitalRead(config.getPinsButton()) == LOW) {
     delay(1000);
-    if (digitalRead(config.getButtonPin()) == LOW) {
+    if (digitalRead(config.getPinsButton()) == LOW) {
       unsigned long duration = 3000;
       unsigned long startTime = millis();
-      while (digitalRead(config.getButtonPin()) == LOW && millis() - startTime <= duration) {
+      while (digitalRead(config.getPinsButton()) == LOW && millis() - startTime <= duration) {
         delay(100);
       }
       if (millis() - startTime > duration) isAPMode = true;
@@ -180,17 +224,19 @@ void setup() {
 
   // Set up default headers
   DefaultHeaders::Instance().addHeader("Server", "ESP32");
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "*");
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
 
   // Set up API endpoints
+  server.on("/api/health", HTTP_GET, healthCheckRequest);
   server.on("/api/status", HTTP_GET, statusGETRequest);
-  server.on("/api/config", HTTP_GET, configGETRequest);
-  server.on("/api/config", HTTP_PUT, configPUTRequest);
   server.on("/api/sensor", HTTP_GET, sensorGETRequest);
-  server.on("/api/restart", HTTP_POST, restartRequest);
-  server.on("/api/reset", HTTP_POST, resetRequest);
+
+  server.on("/api/login", HTTP_POST, loginRequest);
+  server.on("/api/logout", HTTP_GET, logoutRequest);
+
+  server.on("/api/config", HTTP_GET, configGETRequest).addMiddleware(&authMiddleware);
+  server.on("/api/config", HTTP_PUT, configPUTRequest).addMiddleware(&authMiddleware);
+  server.on("/api/restart", HTTP_POST, restartRequest).addMiddleware(&authMiddleware);
+  server.on("/api/reset", HTTP_POST, resetRequest).addMiddleware(&authMiddleware);
 
   // Handle root and not found requests
   server.onNotFound(handleNotFound);

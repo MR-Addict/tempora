@@ -1,9 +1,12 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "utils.h"
+
 struct ConfigStruct {
   String id;
   String name;
+  String token;
   int baudrate;
 
   struct {
@@ -13,23 +16,12 @@ struct ConfigStruct {
     int scl;
   } pins;
 
-  String ssid;
-  String password;
-  String remote_server;
-};
+  struct {
+    String ssid;
+    String password;
+  } wifi;
 
-class IDGenerator {
-public:
-  static String generate(int length = 6) {
-    randomSeed(analogRead(0));
-    const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    String id = "";
-    for (int i = 0; i < length; i++) {
-      int index = random(0, sizeof(charset) - 1);
-      id += charset[index];
-    }
-    return id;
-  }
+  String remote_server;
 };
 
 class DeviceConfig {
@@ -50,8 +42,9 @@ public:
   }
 
   bool reset() {
-    if (deviceConfig.id == "") deviceConfig.id = IDGenerator::generate();
-    deviceConfig.name = "Tempora-" + deviceConfig.id;
+    if (deviceConfig.id == "") deviceConfig.id = Utils::generateID();
+    deviceConfig.name = "tempora-" + deviceConfig.id;
+    deviceConfig.token = "";
     deviceConfig.baudrate = 115200;
 
     deviceConfig.pins.led = -1;
@@ -59,8 +52,9 @@ public:
     deviceConfig.pins.sda = -1;
     deviceConfig.pins.scl = -1;
 
-    deviceConfig.ssid = "";
-    deviceConfig.password = "";
+    deviceConfig.wifi.ssid = "";
+    deviceConfig.wifi.password = "";
+
     deviceConfig.remote_server = "";
 
     save();
@@ -73,15 +67,17 @@ public:
 
     deviceConfig.id = preferences.getString("id", "");
     deviceConfig.name = preferences.getString("name", "");
+    deviceConfig.token = preferences.getString("token", "");
     deviceConfig.baudrate = preferences.getInt("baudrate", 115200);
 
-    deviceConfig.pins.led = preferences.getInt("pin_led", -1);
-    deviceConfig.pins.button = preferences.getInt("pin_button", -1);
-    deviceConfig.pins.sda = preferences.getInt("pin_sda", -1);
-    deviceConfig.pins.scl = preferences.getInt("pin_scl", -1);
+    deviceConfig.pins.led = preferences.getInt("pins.led", -1);
+    deviceConfig.pins.button = preferences.getInt("pins.button", -1);
+    deviceConfig.pins.sda = preferences.getInt("pins.sda", -1);
+    deviceConfig.pins.scl = preferences.getInt("pins.scl", -1);
 
-    deviceConfig.ssid = preferences.getString("ssid", "");
-    deviceConfig.password = preferences.getString("password", "");
+    deviceConfig.wifi.ssid = preferences.getString("wifi.ssid", "");
+    deviceConfig.wifi.password = preferences.getString("wifi.password", "");
+    
     deviceConfig.remote_server = preferences.getString("remote_server", "");
     preferences.end();
 
@@ -93,15 +89,17 @@ public:
 
     preferences.putString("id", deviceConfig.id);
     preferences.putString("name", deviceConfig.name);
+    preferences.putString("token", deviceConfig.token);
     preferences.putInt("baudrate", deviceConfig.baudrate);
 
-    preferences.putInt("pin_led", deviceConfig.pins.led);
-    preferences.putInt("pin_button", deviceConfig.pins.button);
-    preferences.putInt("pin_sda", deviceConfig.pins.sda);
-    preferences.putInt("pin_scl", deviceConfig.pins.scl);
+    preferences.putInt("pins.led", deviceConfig.pins.led);
+    preferences.putInt("pins.button", deviceConfig.pins.button);
+    preferences.putInt("pins.sda", deviceConfig.pins.sda);
+    preferences.putInt("pins.scl", deviceConfig.pins.scl);
 
-    preferences.putString("ssid", deviceConfig.ssid);
-    preferences.putString("password", deviceConfig.password);
+    preferences.putString("wifi.ssid", deviceConfig.wifi.ssid);
+    preferences.putString("wifi.password", deviceConfig.wifi.password);
+
     preferences.putString("remote_server", deviceConfig.remote_server);
     preferences.end();
 
@@ -114,6 +112,7 @@ public:
 
     doc["id"] = deviceConfig.id;
     doc["name"] = deviceConfig.name;
+    doc["token"] = deviceConfig.token;
     doc["baudrate"] = deviceConfig.baudrate;
 
     JsonObject pins = doc.createNestedObject("pins");
@@ -122,8 +121,10 @@ public:
     pins["sda"] = deviceConfig.pins.sda;
     pins["scl"] = deviceConfig.pins.scl;
 
-    doc["ssid"] = deviceConfig.ssid;
-    doc["password"] = deviceConfig.password;
+    JsonObject wifi = doc.createNestedObject("wifi");
+    wifi["ssid"] = deviceConfig.wifi.ssid;
+    wifi["password"] = deviceConfig.wifi.password;
+
     doc["remote_server"] = deviceConfig.remote_server;
 
     String jsonString;
@@ -139,6 +140,7 @@ public:
     if (error) return false;
 
     if (doc.containsKey("name")) deviceConfig.name = doc["name"].as<String>();
+    if(doc.containsKey("token")) deviceConfig.token = Utils::hash(doc["token"].as<String>());
     if (doc.containsKey("baudrate")) deviceConfig.baudrate = doc["baudrate"];
 
     if (doc.containsKey("pins")) {
@@ -149,8 +151,12 @@ public:
       if (pins.containsKey("scl")) deviceConfig.pins.scl = pins["scl"];
     }
 
-    if (doc.containsKey("ssid")) deviceConfig.ssid = doc["ssid"].as<String>();
-    if (doc.containsKey("password")) deviceConfig.password = doc["password"].as<String>();
+    if(doc.containsKey("wifi")) {
+      JsonObject wifi = doc["wifi"];
+      if (wifi.containsKey("ssid")) deviceConfig.wifi.ssid = wifi["ssid"].as<String>();
+      if (wifi.containsKey("password")) deviceConfig.wifi.password = wifi["password"].as<String>();
+    }
+
     if (doc.containsKey("remote_server")) deviceConfig.remote_server = doc["remote_server"].as<String>();
 
     save();
@@ -165,25 +171,28 @@ public:
   String getName() {
     return deviceConfig.name;
   }
-  String getSSID() {
-    return deviceConfig.ssid;
+  String getToken() {
+    return deviceConfig.token;
   }
-  String getPassword() {
-    return deviceConfig.password;
+  String getWiFiSSID() {
+    return deviceConfig.wifi.ssid;
+  }
+  String getWiFiPassword() {
+    return deviceConfig.wifi.password;
   }
   String getRemoteServer() {
     return deviceConfig.remote_server;
   }
-  int getLedPin() {
+  int getPinsLed() {
     return deviceConfig.pins.led;
   }
-  int getButtonPin() {
+  int getPinsButton() {
     return deviceConfig.pins.button;
   }
-  int getSDAPin() {
+  int getPinsSDA() {
     return deviceConfig.pins.sda;
   }
-  int getSCLPin() {
+  int getPinsSCL() {
     return deviceConfig.pins.scl;
   }
   int getBaudrate() {

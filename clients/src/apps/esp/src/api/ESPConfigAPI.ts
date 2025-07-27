@@ -11,8 +11,10 @@ async function getESPConfig(): Promise<ApiResultType<ESPConfig>> {
   const apiUrl = "/api/config";
 
   try {
-    const res = await fetch(apiUrl).then((res) => res.json());
-    const parsed = ESPConfigSchema.safeParse(res);
+    const res = await fetch(apiUrl, { credentials: "include" });
+    if (!res.ok) return { success: false, message: (await res.text()) || failureMessage };
+
+    const parsed = ESPConfigSchema.safeParse(await res.json());
     if (parsed.success) return { success: true, message: successMessage, data: parsed.data };
     else return { success: false, message: failureMessage, detail: parsed.error.message };
   } catch (err) {
@@ -38,9 +40,10 @@ async function updateESPConfig(config: Partial<ESPConfig>): Promise<ApiResultTyp
       method: "PUT",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: JSON.stringify(config)
-    }).then((res) => res.json());
+    });
+    if (!res.ok) return { success: false, message: (await res.text()) || failureMessage };
 
-    const parsed = ESPConfigSchema.safeParse(res);
+    const parsed = ESPConfigSchema.safeParse(await res.json());
     if (parsed.success) return { success: true, message: successMessage, data: parsed.data };
     else return { success: false, message: failureMessage, detail: parsed.error.message };
   } catch (err) {

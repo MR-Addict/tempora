@@ -7,6 +7,11 @@ import { defineConfig, loadEnv } from "vite";
 export default defineConfig(({ mode }) => {
   // Load environment variables from .env files
   const env = loadEnv(mode, process.cwd(), "");
+  const espUrl = env.ESP_URL;
+  if (!espUrl) {
+    console.error("Error: ESP_URL environment variable is not set.");
+    process.exit(1);
+  }
 
   return {
     base: "./",
@@ -31,8 +36,7 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api": {
-          target: env.ESP_URL,
-          changeOrigin: true,
+          target: espUrl,
           rewrite: (path) => path.replace(/^\/api/, "/api")
         }
       }
