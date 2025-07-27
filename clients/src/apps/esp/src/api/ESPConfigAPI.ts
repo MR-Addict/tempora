@@ -1,4 +1,3 @@
-import { url } from "@pkgs/utils";
 import { ApiResultType } from "@/types/app";
 import { ESPConfig, ESPConfigSchema } from "@/types/esp";
 
@@ -6,10 +5,10 @@ import { ESPConfig, ESPConfigSchema } from "@/types/esp";
  * Fetches the ESP configuration from the API.
  */
 async function getESPConfig(): Promise<ApiResultType<ESPConfig>> {
-  const successMessage = "ESP配置信息获取成功";
-  const failureMessage = "ESP配置信息获取失败";
+  const successMessage = "配置信息获取成功";
+  const failureMessage = "配置信息获取失败";
 
-  const apiUrl = url("/api/config");
+  const apiUrl = "/api/config";
 
   try {
     const res = await fetch(apiUrl).then((res) => res.json());
@@ -32,7 +31,7 @@ async function updateESPConfig(config: Partial<ESPConfig>): Promise<ApiResultTyp
   const successMessage = "ESP配置信息更新成功";
   const failureMessage = "ESP配置信息更新失败";
 
-  const apiUrl = url("/api/config");
+  const apiUrl = "/api/config";
 
   try {
     const res = await fetch(apiUrl, {

@@ -2,13 +2,14 @@ import { useLocation } from "react-router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { useTheme } from "@pkgs/hooks";
-import type { ThemeType } from "@pkgs/hooks";
 import { usePersistantState } from "@pkgs/hooks";
+import type { ThemeType } from "@pkgs/hooks";
 
 import { ApiResultType } from "@/types/app";
-import { ESPConfig, ESPSensorData } from "@/types/esp";
 import { ESPConfigAPI } from "@/api/ESPConfigAPI";
 import { ESPSensorAPI } from "@/api/ESPSensorAPI";
+import { ESPStatusAPI } from "@/api/ESPStatusAPI";
+import { ESPConfig, ESPSensorData, ESPStatus } from "@/types/esp";
 
 interface AppContextProps {
   /**
@@ -46,6 +47,14 @@ interface AppContextProps {
   };
 
   /**
+   * The current status of the ESP.
+   */
+  status: {
+    data: ApiResultType<ESPStatus> | null;
+    refresh: () => Promise<void>;
+  };
+
+  /**
    * The current pathname of the application.
    */
   pathname: string;
@@ -61,10 +70,15 @@ const AppContext = createContext<AppContextProps>({
   config: {
     data: null,
     refresh: async () => {},
-    update: async () => ({ success: false, message: "Not implemented" })
+    update: async () => ({ success: false, message: "" })
   },
 
   sensor: {
+    data: null,
+    refresh: async () => {}
+  },
+
+  status: {
     data: null,
     refresh: async () => {}
   },
@@ -78,6 +92,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
 
   const [config, setConfig] = useState<ApiResultType<ESPConfig> | null>(null);
   const [sensor, setSensor] = useState<ApiResultType<ESPSensorData> | null>(null);
+  const [status, setStatus] = useState<ApiResultType<ESPStatus> | null>(null);
 
   const location = useLocation();
   const pathname = useMemo(() => location.pathname.split("/").slice(0, 2).join("/"), [location.pathname]);
@@ -96,9 +111,14 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     setSensor(await ESPSensorAPI.get());
   }
 
+  async function refreshStatus() {
+    setStatus(await ESPStatusAPI.get());
+  }
+
   useEffect(() => {
     refreshConfig();
     refreshSensor();
+    refreshStatus();
   }, []);
 
   return (
@@ -119,6 +139,11 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
         sensor: {
           data: sensor,
           refresh: refreshSensor
+        },
+
+        status: {
+          data: status,
+          refresh: refreshStatus
         },
 
         pathname

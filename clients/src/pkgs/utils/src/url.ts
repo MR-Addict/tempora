@@ -12,7 +12,7 @@ function join(...args: string[]): string {
 export function url(...paths: string[]): string {
   const windowUrl = window.location.origin;
   // @ts-expect-error
-  const envUrl: string | undefined = import.meta.env.VITE_ESP_SERVER_URL;
+  const envUrl: string | undefined = import.meta.env.VITE_ESP_URL;
 
   let baseUrl = windowUrl;
   // If an environment variable is set, use it as the base URL
@@ -20,7 +20,7 @@ export function url(...paths: string[]): string {
   // If the current URL is localhost, use the environment variable if available
   else if (windowUrl.includes("localhost")) {
     if (envUrl) baseUrl = envUrl;
-    else console.warn("No VITE_ESP_SERVER_URL set, using current location:", baseUrl);
+    else console.warn("No VITE_ESP_URL set, using current location:", baseUrl);
   }
 
   // Join the paths with the base URL

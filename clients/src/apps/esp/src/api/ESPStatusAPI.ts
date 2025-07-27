@@ -1,18 +1,18 @@
 import { ApiResultType } from "@/types/app";
-import { ESPSensorDataSchema, ESPSensorData } from "@/types/esp";
+import { ESPStatusSchema, ESPStatus } from "@/types/esp";
 
 /**
- * Fetches the latest sensor data from the ESP API.
+ * Fetches the current status from the ESP API.
  */
-async function getESPSensorData(): Promise<ApiResultType<ESPSensorData>> {
-  const successMessage = "传感器数据获取成功";
-  const failureMessage = "传感器数据获取失败";
+async function getESPStatus(): Promise<ApiResultType<ESPStatus>> {
+  const successMessage = "ESP状态获取成功";
+  const failureMessage = "ESP状态获取失败";
 
-  const apiUrl = "/api/sensor";
+  const apiUrl = "/api/status";
 
   try {
     const res = await fetch(apiUrl).then((res) => res.json());
-    const parsed = ESPSensorDataSchema.safeParse(res);
+    const parsed = ESPStatusSchema.safeParse(res);
     if (parsed.success) return { success: true, message: successMessage, data: parsed.data };
     else return { success: false, message: failureMessage, detail: parsed.error.message };
   } catch (err) {
@@ -22,6 +22,6 @@ async function getESPSensorData(): Promise<ApiResultType<ESPSensorData>> {
   }
 }
 
-export const ESPSensorAPI = {
-  get: getESPSensorData
+export const ESPStatusAPI = {
+  get: getESPStatus
 };
