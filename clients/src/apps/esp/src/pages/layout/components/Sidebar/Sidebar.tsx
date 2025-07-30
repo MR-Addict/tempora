@@ -4,6 +4,8 @@ import { Link } from "react-router";
 import { LuPanelLeftClose } from "react-icons/lu";
 
 import style from "./Sidebar.module.css";
+import ThemeButton from "./components/ThemeButton/ThemeButton";
+
 import { links, NavLink } from "@/data/links";
 import { useAppContext } from "@/contexts/App";
 import { useClickOutside, useMediaQuery } from "@pkgs/hooks";
@@ -35,7 +37,7 @@ export default function Sidebar() {
         )}
       </header>
 
-      <nav className={style.nav}>
+      <nav className={style.menu}>
         <ul>
           {links.map((link) => (
             <li key={link.href}>
@@ -52,6 +54,10 @@ export default function Sidebar() {
             </li>
           ))}
         </ul>
+      </nav>
+
+      <nav className={style.bottom}>
+        <ThemeButton />
       </nav>
     </header>
   );

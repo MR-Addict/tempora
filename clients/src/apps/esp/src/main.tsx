@@ -7,7 +7,7 @@ import "@pkgs/components/style.css";
 
 import Home from "@/pages/home/home";
 import NotFound from "./pages/404/404";
-import Setup from "@/pages/setup/setup";
+import Setup from "@/pages/status/status";
 import Layout from "@/pages/layout/layout";
 
 createRoot(document.getElementById("root")!).render(
@@ -16,7 +16,7 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="setup" element={<Setup />} />
+          <Route path="status" element={<Setup />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

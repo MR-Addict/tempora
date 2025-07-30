@@ -17,9 +17,45 @@
   }
 
   & .select-menu {
+    @apply absolute z-10 rounded-md;
     @apply border border-gray-200 bg-white;
-    @apply absolute z-10 top-full translate-y-2 right-0 rounded-md;
-    @apply flex flex-col gap-0.5 origin-top invisible opacity-0 scale-y-90 duration-100 py-1.5;
+    @apply flex flex-col gap-0.5 invisible opacity-0 scale-y-90 duration-100 py-1.5;
+
+    &[data-align="bottom-right"],
+    &[data-align="bottom-left"],
+    &[data-align="bottom-center"] {
+      @apply top-full translate-y-2 origin-top;
+    }
+
+    &[data-align="bottom-right"] {
+      @apply right-0;
+    }
+
+    &[data-align="bottom-left"] {
+      @apply left-0;
+    }
+
+    &[data-align="bottom-center"] {
+      @apply left-1/2 -translate-x-1/2;
+    }
+
+    &[data-align="top-right"],
+    &[data-align="top-left"],
+    &[data-align="top-center"] {
+      @apply bottom-full -translate-y-2 origin-bottom;
+    }
+
+    &[data-align="top-right"] {
+      @apply right-0;
+    }
+
+    &[data-align="top-left"] {
+      @apply left-0;
+    }
+
+    &[data-align="top-center"] {
+      @apply left-1/2 -translate-x-1/2;
+    }
 
     &.expanded {
       @apply visible scale-y-100 opacity-100;

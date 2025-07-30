@@ -4,6 +4,8 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { useTheme } from "@pkgs/hooks";
 
+import { Select } from "../src/Select/Select";
+
 function ThemeButton() {
   const [theme, setTheme] = useTheme("light");
 
@@ -24,7 +26,9 @@ function App() {
         <ThemeButton />
       </header>
 
-      <div className="components">{/* <Spinner /> */}</div>
+      <div className="components">
+        <Select label="Food" options={[{ label: "Apple", value: "apple" }]} />
+      </div>
     </section>
   );
 }

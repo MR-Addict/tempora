@@ -1,7 +1,7 @@
 import { Outlet } from "react-router";
 
 import style from "./layout.module.css";
-import Navbar from "./components/Navtab/Navtab";
+import Navbar from "./components/Navbar/Navbar";
 import Sidebar from "./components/Sidebar/Sidebar";
 import { AppContextProvider } from "@/contexts/App";
 

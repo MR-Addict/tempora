@@ -34,7 +34,7 @@ interface AppContextProps {
    */
   config: {
     data: ApiResultType<ESPConfig> | null;
-    refresh: () => Promise<void>;
+    refresh: () => Promise<ApiResultType<ESPConfig>>;
     update: (newConfig: Partial<ESPConfig>) => Promise<ApiResultType<ESPConfig>>;
   };
 
@@ -43,7 +43,7 @@ interface AppContextProps {
    */
   sensor: {
     data: ApiResultType<ESPSensorData> | null;
-    refresh: () => Promise<void>;
+    refresh: () => Promise<ApiResultType<ESPSensorData>>;
   };
 
   /**
@@ -51,7 +51,7 @@ interface AppContextProps {
    */
   status: {
     data: ApiResultType<ESPStatus> | null;
-    refresh: () => Promise<void>;
+    refresh: () => Promise<ApiResultType<ESPStatus>>;
   };
 
   /**
@@ -69,18 +69,18 @@ const AppContext = createContext<AppContextProps>({
 
   config: {
     data: null,
-    refresh: async () => {},
+    refresh: async () => ({ success: false, message: "" }),
     update: async () => ({ success: false, message: "" })
   },
 
   sensor: {
     data: null,
-    refresh: async () => {}
+    refresh: async () => ({ success: false, message: "" })
   },
 
   status: {
     data: null,
-    refresh: async () => {}
+    refresh: async () => ({ success: false, message: "" })
   },
 
   pathname: "/"
@@ -98,7 +98,9 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const pathname = useMemo(() => location.pathname.split("/").slice(0, 2).join("/"), [location.pathname]);
 
   async function refreshConfig() {
-    setConfig(await ESPConfigAPI.get());
+    const res = await ESPConfigAPI.get();
+    setConfig(res);
+    return res;
   }
 
   async function updateConfig(newConfig: Partial<ESPConfig>) {
@@ -108,15 +110,18 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   }
 
   async function refreshSensor() {
-    setSensor(await ESPSensorAPI.get());
+    const res = await ESPSensorAPI.get();
+    setSensor(res);
+    return res;
   }
 
   async function refreshStatus() {
-    setStatus(await ESPStatusAPI.get());
+    const res = await ESPStatusAPI.get();
+    setStatus(res);
+    return res;
   }
 
   useEffect(() => {
-    refreshConfig();
     refreshSensor();
     refreshStatus();
   }, []);

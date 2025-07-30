@@ -8,17 +8,17 @@
 
   @apply border-r-0 border-gray-200 bg-white;
   @apply overflow-hidden whitespace-nowrap;
-  @apply z-10 w-0 flex flex-col fixed md:sticky gap-4 top-0;
+  @apply z-10 w-0 flex flex-col fixed md:sticky gap-6 top-0;
 
   & > header {
-    @apply px-4 py-1 relative;
+    @apply px-4 pt-1 relative;
 
     & h1 {
-      @apply text-xl font-semibold font-serif border-b border-gray-300 py-2;
+      @apply text-xl font-semibold font-serif border-b border-gray-300 py-3;
     }
 
     & button {
-      @apply p-1.5 rounded-full md:hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-700;
+      @apply p-1.5 rounded-full md:hidden absolute right-4 top-1/2 -translate-y-1/2 text-gray-500;
 
       &:hover {
         @apply bg-gray-200;
@@ -31,7 +31,7 @@
   }
 }
 
-.nav {
+.menu {
   @apply flex flex-col overflow-auto;
 
   & > ul {
@@ -48,5 +48,17 @@
 
   &.active {
     @apply bg-gray-300;
+  }
+}
+
+.bottom {
+  @apply mt-auto px-4 pb-4 flex flex-row items-center justify-between gap-2;
+
+  & > a {
+    @apply p-1.5 rounded-full text-gray-800;
+
+    &:hover {
+      @apply bg-gray-200;
+    }
   }
 }

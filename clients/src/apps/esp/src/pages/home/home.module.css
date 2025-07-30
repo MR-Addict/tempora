@@ -1,0 +1,28 @@
+@reference "tailwindcss";
+
+.wrapper {
+  @apply w-full flex-1 flex flex-col items-center justify-center p-4;
+}
+
+.content {
+  @apply flex flex-col items-center justify-center p-10;
+  @apply aspect-square rounded-full border-2 border-gray-500;
+
+  & > div {
+    @apply flex flex-col items-center justify-center;
+
+    & > p {
+      &.name {
+        @apply text-gray-500 mb-1;
+      }
+
+      &.temperature {
+        @apply text-8xl font-bold;
+      }
+
+      &.humidity {
+        @apply text-xl text-gray-700 mt-3;
+      }
+    }
+  }
+}

@@ -13,6 +13,10 @@ export const ESPConfigSchema = z.object({
    * Device baudrate
    */
   baudrate: z.number(),
+  /**
+   * Device token crendential
+   */
+  token: z.string(),
 
   /**
    * Device pins configuration
@@ -27,13 +31,18 @@ export const ESPConfigSchema = z.object({
   }),
 
   /**
-   * Device WiFi SSID
+   * Device WiFi configuration
    */
-  ssid: z.string(),
-  /**
-   * Device WiFI password
-   */
-  password: z.string()
+  wifi: z.object({
+    /**
+     * Device WiFi SSID
+     */
+    ssid: z.string(),
+    /**
+     * Device WiFI password
+     */
+    password: z.string()
+  })
 });
 export type ESPConfig = z.infer<typeof ESPConfigSchema>;
 
@@ -42,6 +51,7 @@ export const ESPStatusSchema = z.object({
   button_connected: z.boolean(),
   wifi_connected: z.boolean(),
   sensor_connected: z.boolean(),
+  name: z.string().default("南京市-浦口区"),
   sta: z.boolean(),
   rssi: z.number(),
   ssid: z.string(),
@@ -60,6 +70,10 @@ export const ESPSensorDataSchema = z.object({
    * Sensor humidity in percentage
    */
   humidity: z.number(),
+  /**
+   * The date when the sensor data was recorded
+   */
+  date: z.string(),
   /**
    * Indicates if the sensor data is valid
    *

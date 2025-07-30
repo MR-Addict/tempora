@@ -12,7 +12,7 @@ async function getESPSensorData(): Promise<ApiResultType<ESPSensorData>> {
 
   try {
     const res = await fetch(apiUrl, { credentials: "include" }).then((res) => res.json());
-    const parsed = ESPSensorDataSchema.safeParse(res);
+    const parsed = ESPSensorDataSchema.safeParse({ ...res, date: new Date().toISOString() });
     if (parsed.success) return { success: true, message: successMessage, data: parsed.data };
     else return { success: false, message: failureMessage, detail: parsed.error.message };
   } catch (err) {

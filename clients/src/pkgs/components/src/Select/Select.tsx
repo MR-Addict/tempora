@@ -5,6 +5,8 @@ import { LuChevronDown } from "react-icons/lu";
 import style from "./Select.module.css";
 import { useClickOutside } from "@pkgs/hooks";
 
+type Align = "bottom-right" | "bottom-center" | "bottom-left" | "top-right" | "top-center" | "top-left";
+
 export interface SelectOption<T> {
   /**
    * The label for the option.
@@ -48,6 +50,11 @@ interface SelectProps<T> {
    * @default true
    */
   arrowIcon?: boolean;
+  /**
+   * The position of the option in the dropdown.
+   * @default "bottom-left"
+   */
+  align?: Align;
 }
 
 /**
@@ -79,7 +86,10 @@ export function Select<T extends string | number>(props: SelectProps<T>) {
         )}
       </button>
 
-      <ul className={clsx(style["select-menu"], { [style.expanded]: expanded })}>
+      <ul
+        data-align={props.align || "bottom-right"}
+        className={clsx(style["select-menu"], { [style.expanded]: expanded })}
+      >
         {props.options.map((option) => (
           <li key={option.value}>
             <button

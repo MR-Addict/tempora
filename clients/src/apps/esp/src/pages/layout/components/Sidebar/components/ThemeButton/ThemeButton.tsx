@@ -66,6 +66,7 @@ export default function ThemeButton({ className }: { className?: string }) {
 
   return (
     <Select
+      align="top-left"
       arrowIcon={false}
       className={className}
       options={themeOptions}

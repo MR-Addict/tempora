@@ -92,6 +92,7 @@ void statusGETRequest(AsyncWebServerRequest* request) {
   doc["wifi_connected"] = WiFi.status() == WL_CONNECTED;
   doc["sensor_connected"] = sht30.available();
 
+  doc["name"] = config.getName();
   doc["sta"] = WiFi.getMode() == WIFI_STA;
   doc["rssi"] = WiFi.RSSI();
   doc["ssid"] = WiFi.SSID();

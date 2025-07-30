@@ -15,8 +15,8 @@ export const links: NavLink[] = [
     Icon: LiaTemperatureHighSolid
   },
   {
-    href: "/setup",
-    name: "配置信息",
+    href: "/status",
+    name: "设备状态",
     Icon: HiOutlineCpuChip
   }
 ];
