@@ -45,6 +45,65 @@ public:
 
     return cookies.substring(start, end);
   }
+
+  // Detect content type based on file extension
+  static String getContentType(const String& filename) {
+    String extension = "";
+    int lastDot = filename.lastIndexOf('.');
+    if (lastDot > 0) {
+      extension = filename.substring(lastDot);
+      extension.toLowerCase();
+    }
+
+    // Text files
+    if (extension == ".html" || extension == ".htm") return "text/html";
+    if (extension == ".css") return "text/css";
+    if (extension == ".js") return "application/javascript";
+    if (extension == ".json") return "application/json";
+    if (extension == ".xml") return "application/xml";
+    if (extension == ".txt") return "text/plain";
+    if (extension == ".csv") return "text/csv";
+
+    // Images
+    if (extension == ".png") return "image/png";
+    if (extension == ".jpg" || extension == ".jpeg") return "image/jpeg";
+    if (extension == ".gif") return "image/gif";
+    if (extension == ".svg") return "image/svg+xml";
+    if (extension == ".ico") return "image/x-icon";
+    if (extension == ".webp") return "image/webp";
+    if (extension == ".bmp") return "image/bmp";
+
+    // Fonts
+    if (extension == ".woff") return "font/woff";
+    if (extension == ".woff2") return "font/woff2";
+    if (extension == ".ttf") return "font/ttf";
+    if (extension == ".otf") return "font/otf";
+    if (extension == ".eot") return "application/vnd.ms-fontobject";
+
+    // Audio/Video
+    if (extension == ".mp3") return "audio/mpeg";
+    if (extension == ".wav") return "audio/wav";
+    if (extension == ".ogg") return "audio/ogg";
+    if (extension == ".mp4") return "video/mp4";
+    if (extension == ".webm") return "video/webm";
+    if (extension == ".avi") return "video/x-msvideo";
+
+    // Archives
+    if (extension == ".zip") return "application/zip";
+    if (extension == ".gz") return "application/gzip";
+    if (extension == ".tar") return "application/x-tar";
+    if (extension == ".rar") return "application/vnd.rar";
+
+    // Documents
+    if (extension == ".pdf") return "application/pdf";
+    if (extension == ".doc") return "application/msword";
+    if (extension == ".docx") return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    if (extension == ".xls") return "application/vnd.ms-excel";
+    if (extension == ".xlsx") return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    // Default fallback
+    return "application/octet-stream";
+  }
 };
 
 #endif  // UTILS_H
