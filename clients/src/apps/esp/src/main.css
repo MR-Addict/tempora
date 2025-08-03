@@ -1,6 +1,23 @@
 @import "tailwindcss";
 @import "@pkgs/config/styles/tailwind.css";
 
+::view-transition-old(root) {
+  animation-delay: 500ms;
+}
+
+::view-transition-new(root) {
+  animation: circle-in 500ms ease-in-out;
+}
+
+@keyframes circle-in {
+  from {
+    clip-path: circle(0% at 0% 100%);
+  }
+  to {
+    clip-path: circle(150% at 0% 100%);
+  }
+}
+
 #root {
   min-height: 100vh;
   min-height: 100dvh;

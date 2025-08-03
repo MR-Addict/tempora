@@ -6,8 +6,8 @@
 
   transition: width 300ms;
 
-  @apply border-r-0 border-gray-200 bg-white;
   @apply overflow-hidden whitespace-nowrap;
+  @apply border-r-0 border-gray-200 bg-white;
   @apply z-10 w-0 flex flex-col fixed md:sticky gap-6 top-0;
 
   & > header {
@@ -32,7 +32,7 @@
 }
 
 .menu {
-  @apply flex flex-col overflow-auto;
+  @apply flex flex-col;
 
   & > ul {
     @apply flex flex-col gap-2 px-4;

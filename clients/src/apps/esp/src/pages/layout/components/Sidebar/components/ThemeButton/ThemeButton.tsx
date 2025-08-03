@@ -4,6 +4,7 @@ import { AiOutlineMoon, AiOutlineSun } from "react-icons/ai";
 
 import type { ThemeType } from "@pkgs/hooks";
 import { useAppContext } from "@/contexts/App";
+import { startViewTransition } from "@pkgs/utils";
 
 import style from "./ThemeButton.module.css";
 import { type SelectOption, Select } from "@pkgs/components";
@@ -43,7 +44,7 @@ export default function ThemeButton({ className }: { className?: string }) {
   const { theme, setTheme } = useAppContext();
 
   function handleThemeChange(value: ThemeType) {
-    setTheme(value);
+    startViewTransition(() => setTheme(value));
   }
 
   const themeOptions: SelectOption<ThemeType>[] = [
