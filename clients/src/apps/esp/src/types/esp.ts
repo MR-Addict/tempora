@@ -51,7 +51,7 @@ export const ESPStatusSchema = z.object({
   button_connected: z.boolean(),
   wifi_connected: z.boolean(),
   sensor_connected: z.boolean(),
-  name: z.string().default("南京市-浦口区"),
+  name: z.string(),
   sta: z.boolean(),
   rssi: z.number(),
   ssid: z.string(),
