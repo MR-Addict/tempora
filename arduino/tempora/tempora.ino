@@ -37,25 +37,25 @@ static AsyncMiddlewareFunction authMiddleware([](AsyncWebServerRequest* request,
     }
 
     if (isAuthenticated) next();
-    else request->send(401, "text/plain", "未授权访问，请先登录");
+    else request->send(401, "text/plain", "Unauthorized, please login first");
   }
 });
 
 void loginRequest(AsyncWebServerRequest* request) {
-  if (config.getToken().isEmpty()) request->send(500, "text/plain", "ESP32还没有配置token信息");
+  if (config.getToken().isEmpty()) request->send(500, "text/plain", "No token has been initialized");
   else if (request->hasParam("password", true)) {
     String password = request->getParam("password", true)->value();
     String token = Utils::hash(password);
     if (token == config.getToken()) {
-      AsyncWebServerResponse* response = request->beginResponse(200, "text/plain", "登录成功");
+      AsyncWebServerResponse* response = request->beginResponse(200, "text/plain", "Login successful");
       response->addHeader("Set-Cookie", "token=" + token + "; Path=/; HttpOnly; Max-Age=2592000");
       request->send(response);
-    } else request->send(401, "text/plain", "密码错误");
-  } else request->send(400, "text/plain", "缺少密码参数");
+    } else request->send(401, "text/plain", "Wrong admin password");
+  } else request->send(400, "text/plain", "Missing password parameter");
 }
 
 void logoutRequest(AsyncWebServerRequest* request) {
-  AsyncWebServerResponse* response = request->beginResponse(200, "text/plain", "登出成功");
+  AsyncWebServerResponse* response = request->beginResponse(200, "text/plain", "Logout successful");
   response->addHeader("Set-Cookie", "token=; Path=/; HttpOnly; Max-Age=0");
   request->send(response);
 }
@@ -113,8 +113,8 @@ void configPUTRequest(AsyncWebServerRequest* request) {
   if (request->hasParam("body", true)) {
     String formData = request->getParam("body", true)->value();
     if (config.fromJson(formData)) request->send(200, "application/json", config.toJson());
-    else request->send(500, "text/plain", "配置信息格式错误");
-  } else request->send(400, "text/plain", "请求体缺少body参数");
+    else request->send(400, "text/plain", "Unable to parse config JSON");
+  } else request->send(400, "text/plain", "Missing body parameter");
 }
 
 void sensorGETRequest(AsyncWebServerRequest* request) {
@@ -127,7 +127,7 @@ void restartRequest(AsyncWebServerRequest* request) {
     ESP.restart();
   });
   ledService.blink();
-  request->send(200, "text/plain", "重启请求已发送，ESP32将在2秒后重启");
+  request->send(200, "text/plain", "Restarting in 2 seconds...");
 }
 
 void resetRequest(AsyncWebServerRequest* request) {
@@ -181,6 +181,7 @@ void setup() {
     Serial.print("Current config JSON:");
     Serial.println(config.toJson());
   } else {
+    Serial.begin(115200);
     Serial.println("Unable to start the config session.");
     return;
   }
@@ -221,7 +222,7 @@ void setup() {
   }
 
   // Initialize web server
-  Serial.println("Starting web server...");
+  Serial.println("Serving web server ");
 
   // Set up default headers
   DefaultHeaders::Instance().addHeader("Server", "ESP32");
