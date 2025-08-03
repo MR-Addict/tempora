@@ -24,15 +24,15 @@ function Content({ status }: { status: ESPStatus }) {
           <div className={style.items}>
             <div className={style.item}>
               <h2>温度传感器连接状态</h2>
-              <p>{status.sensor_connected ? "已连接" : "未连接"}</p>
+              <p data-success={status.sensor_connected}>{status.sensor_connected ? "已连接" : "未连接"}</p>
             </div>
             <div className={style.item}>
               <h2>LED连接状态</h2>
-              <p>{status.led_connected ? "已连接" : "未连接"}</p>
+              <p data-success={status.led_connected}>{status.led_connected ? "已连接" : "未连接"}</p>
             </div>
             <div className={style.item}>
               <h2>按钮连接状态</h2>
-              <p>{status.button_connected ? "已连接" : "未连接"}</p>
+              <p data-success={status.button_connected}>{status.button_connected ? "已连接" : "未连接"}</p>
             </div>
           </div>
         </div>
