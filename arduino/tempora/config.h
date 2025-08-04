@@ -12,8 +12,7 @@ struct ConfigStruct {
   struct {
     int led;
     int button;
-    int sda;
-    int scl;
+    int sensor;
   } pins;
 
   struct {
@@ -49,8 +48,7 @@ public:
 
     deviceConfig.pins.led = -1;
     deviceConfig.pins.button = -1;
-    deviceConfig.pins.sda = -1;
-    deviceConfig.pins.scl = -1;
+    deviceConfig.pins.sensor = -1;
 
     deviceConfig.wifi.ssid = "";
     deviceConfig.wifi.password = "";
@@ -72,12 +70,11 @@ public:
 
     deviceConfig.pins.led = preferences.getInt("pins.led", -1);
     deviceConfig.pins.button = preferences.getInt("pins.button", -1);
-    deviceConfig.pins.sda = preferences.getInt("pins.sda", -1);
-    deviceConfig.pins.scl = preferences.getInt("pins.scl", -1);
+    deviceConfig.pins.sensor = preferences.getInt("pins.sensor", -1);
 
     deviceConfig.wifi.ssid = preferences.getString("wifi.ssid", "");
     deviceConfig.wifi.password = preferences.getString("wifi.password", "");
-    
+
     deviceConfig.remote_server = preferences.getString("remote_server", "");
     preferences.end();
 
@@ -94,8 +91,7 @@ public:
 
     preferences.putInt("pins.led", deviceConfig.pins.led);
     preferences.putInt("pins.button", deviceConfig.pins.button);
-    preferences.putInt("pins.sda", deviceConfig.pins.sda);
-    preferences.putInt("pins.scl", deviceConfig.pins.scl);
+    preferences.putInt("pins.sensor", deviceConfig.pins.sensor);
 
     preferences.putString("wifi.ssid", deviceConfig.wifi.ssid);
     preferences.putString("wifi.password", deviceConfig.wifi.password);
@@ -118,8 +114,7 @@ public:
     JsonObject pins = doc.createNestedObject("pins");
     pins["led"] = deviceConfig.pins.led;
     pins["button"] = deviceConfig.pins.button;
-    pins["sda"] = deviceConfig.pins.sda;
-    pins["scl"] = deviceConfig.pins.scl;
+    pins["sensor"] = deviceConfig.pins.sensor;
 
     JsonObject wifi = doc.createNestedObject("wifi");
     wifi["ssid"] = deviceConfig.wifi.ssid;
@@ -140,18 +135,17 @@ public:
     if (error) return false;
 
     if (doc.containsKey("name")) deviceConfig.name = doc["name"].as<String>();
-    if(doc.containsKey("token")) deviceConfig.token = Utils::hash(doc["token"].as<String>());
+    if (doc.containsKey("token")) deviceConfig.token = Utils::hash(doc["token"].as<String>());
     if (doc.containsKey("baudrate")) deviceConfig.baudrate = doc["baudrate"];
 
     if (doc.containsKey("pins")) {
       JsonObject pins = doc["pins"];
       if (pins.containsKey("led")) deviceConfig.pins.led = pins["led"];
       if (pins.containsKey("button")) deviceConfig.pins.button = pins["button"];
-      if (pins.containsKey("sda")) deviceConfig.pins.sda = pins["sda"];
-      if (pins.containsKey("scl")) deviceConfig.pins.scl = pins["scl"];
+      if (pins.containsKey("sensor")) deviceConfig.pins.sensor = pins["sensor"];
     }
 
-    if(doc.containsKey("wifi")) {
+    if (doc.containsKey("wifi")) {
       JsonObject wifi = doc["wifi"];
       if (wifi.containsKey("ssid")) deviceConfig.wifi.ssid = wifi["ssid"].as<String>();
       if (wifi.containsKey("password")) deviceConfig.wifi.password = wifi["password"].as<String>();
@@ -189,11 +183,8 @@ public:
   int getPinsButton() {
     return deviceConfig.pins.button;
   }
-  int getPinsSDA() {
-    return deviceConfig.pins.sda;
-  }
-  int getPinsSCL() {
-    return deviceConfig.pins.scl;
+  int getPinsSensor() {
+    return deviceConfig.pins.sensor;
   }
   int getBaudrate() {
     return deviceConfig.baudrate;

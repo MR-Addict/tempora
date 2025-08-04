@@ -1,5 +1,4 @@
 #include <WiFi.h>
-#include <Wire.h>
 
 #include <Ticker.h>
 #include <ArduinoJson.h>
@@ -10,10 +9,10 @@
 
 #include "led.h"
 #include "utils.h"
-#include "sht30.h"
+#include "dht11.h"
 #include "config.h"
 
-SHT30 sht30;
+DHT11 dht11;
 DeviceConfig config;
 LedService ledService;
 
@@ -91,7 +90,7 @@ void statusGETRequest(AsyncWebServerRequest* request) {
   doc["led_connected"] = config.getPinsLed() != -1;
   doc["button_connected"] = config.getPinsButton() != -1;
   doc["wifi_connected"] = WiFi.status() == WL_CONNECTED;
-  doc["sensor_connected"] = sht30.available();
+  doc["sensor_connected"] = dht11.available();
 
   doc["name"] = config.getName();
   doc["sta"] = WiFi.getMode() == WIFI_STA;
@@ -119,7 +118,7 @@ void configPUTRequest(AsyncWebServerRequest* request) {
 }
 
 void sensorGETRequest(AsyncWebServerRequest* request) {
-  SHT30Data data = sht30.readData();
+  DHT11Data data = dht11.readData();
   request->send(200, "application/json", data.toJson());
 }
 
@@ -196,7 +195,7 @@ void setup() {
   // Initialize pins
   WiFi.hostname("tempora-" + config.getId());
   ledService.begin(config.getPinsLed());
-  sht30.begin(config.getPinsSDA(), config.getPinsSCL());
+  dht11.begin(config.getPinsSensor());
   if (config.getPinsButton() != -1) pinMode(config.getPinsButton(), INPUT_PULLUP);
 
   // Initialize WiFi
