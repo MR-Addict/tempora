@@ -122,8 +122,10 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   }
 
   useEffect(() => {
-    refreshSensor();
-    refreshStatus();
+    const fetchData = async () => await Promise.all([refreshConfig(), refreshSensor(), refreshStatus()]);
+    const intervalId = setInterval(fetchData, 3000);
+    fetchData();
+    return () => clearInterval(intervalId);
   }, []);
 
   return (

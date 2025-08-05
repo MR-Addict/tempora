@@ -84,7 +84,7 @@ public:
     }
 
     // 距离上次读取时间小于5秒，直接返回上次数据
-    if (millis() - _lastReadTime < 5000) {
+    if (millis() - _lastReadTime < 3000) {
       return _lastData;
     }
 
